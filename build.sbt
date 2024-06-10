@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "3.2.2"
+ThisBuild / scalaVersion := "3.4.0"
 ThisBuild / version := "0.1.0"
 ThisBuild / organization := "$project_name_camel_case$"
 ThisBuild / organizationName := "$project_name_camel_case$"
@@ -22,8 +22,10 @@ lazy val root = (project in file("."))
       "500",
       "-Wconf:any:error",
       "-no-indent",
-      "-rewrite"
+      "-rewrite",
+      "-Wunused:imports"
     ),
+    semanticdbEnabled := true,
     libraryDependencies ++= Seq(
       Deps.munit % Test,
       Deps.doobieMunit % Test,
