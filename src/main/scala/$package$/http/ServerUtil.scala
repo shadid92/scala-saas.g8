@@ -7,6 +7,7 @@ import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Server
 import doobie.util.ExecutionContexts
 import doobie.hikari.HikariTransactor
+import $package$.prelude.deriveMeta.logHandler
 
 object ServerUtil {
 
@@ -37,7 +38,8 @@ object ServerUtil {
         conf.setMaximumPoolSize(10)
         conf
       },
-      ec
+      ec,
+      Some(logHandler)
     )
   } yield xa
 

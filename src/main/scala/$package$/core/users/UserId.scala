@@ -5,6 +5,6 @@ import $package$.core.util.TaggedUUID
 import $package$.core.util.TaggedUUIDCompanion
 
 case class UserId(override val uuid: UUID) extends TaggedUUID["user"](uuid)
-object UserId extends TaggedUUIDCompanion["user", UserId] {
+object UserId extends TaggedUUIDCompanion["user"] {
   override def fromUUID(uuid: UUID) = UserId(uuid)
 }

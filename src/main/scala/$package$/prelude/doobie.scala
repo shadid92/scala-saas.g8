@@ -26,41 +26,44 @@ object deriveMeta {
     }(_.toString)
   }
 
-}
-
-given LogHandler = LogHandler { event =>
-  val logPrefix =
-    Thread.currentThread.getStackTrace
-      .lift(1)
-      .map(_.getMethodName)
-      .getOrElse("UNKNOWN") + " :: "
-
-  import cats.effect.unsafe.implicits.global
-
-  event match {
-    case ProcessingFailure(s, a, e1, e2, t) =>
-      Logger.ioLogger
-        .error(logPrefix + s"""Failed Resultset Processing:
+  def logHandler[F[_]: Async] = new LogHandler[F] {
+    import org.typelevel.log4cats.slf4j.Slf4jLogger
+    import org.typelevel.log4cats.Logger as CatsLogger
+    override def run(logEvent: LogEvent): F[Unit] = {
+      val catsLogger: CatsLogger[F] = Slf4jLogger.getLogger[F]
+      val logPrefix =
+        Thread.currentThread.getStackTrace
+          .lift(1)
+          .map(_.getMethodName)
+          .getOrElse("UNKNOWN") + " :: "
+      logEvent match {
+        case ExecFailure(sql, args, label, exec, failure) =>
+          catsLogger.error(logPrefix + s"""Failed Statement Execution:
          |
-         |  \${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+         |  ${sql.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
          |
-         | arguments = [\${a.mkString(", ")}]
-         |   elapsed = \${e1.toMillis.toString} ms exec + \${e2.toMillis.toString} ms processing (failed) (\${(e1 + e2).toMillis.toString} ms total)
-         |   failure = \${t.getMessage}
+         | arguments = [${args.mkString(", ")}]
+         |   elapsed = ${exec.toMillis.toString} ms exec (failed)
+         |   failure = ${failure.getMessage}
          """.stripMargin)
-        .unsafeRunAsync(identity)
-
-    case ExecFailure(s, a, e1, t) =>
-      Logger.ioLogger
-        .error(logPrefix + s"""Failed Statement Execution:
+        case ProcessingFailure(sql, args, label, exec, processing, failure) =>
+          catsLogger.error(logPrefix + s"""Failed Resultset Processing:
          |
-         |  \${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+         |  ${sql.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
          |
-         | arguments = [\${a.mkString(", ")}]
-         |   elapsed = \${e1.toMillis.toString} ms exec (failed)
-         |   failure = \${t.getMessage}
+         | arguments = [${args.mkString(", ")}]
+         |   elapsed = ${exec.toMillis.toString} ms exec + ${processing.toMillis.toString} ms processing (failed) (${(exec + processing).toMillis.toString} ms total)
+         |   failure = ${failure.getMessage}
          """.stripMargin)
-        .unsafeRunAsync(identity)
-    case _ => ()
+
+        case Success(sql, args, label, exec, processing) =>
+          catsLogger.info(logPrefix + s"""Success Resultset Processing:
+         |  ${sql.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+         | arguments = [${args.mkString(", ")}]
+         |   elapsed = ${exec.toMillis.toString} ms exec + ${processing.toMillis.toString} ms 
+         |   processing (failed) (${(exec + processing).toMillis.toString} ms total)
+         """.stripMargin)
+      }
+    }
   }
 }
