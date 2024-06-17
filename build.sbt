@@ -22,8 +22,8 @@ lazy val root = (project in file("."))
       "500",
       "-Wconf:any:error",
       "-no-indent",
-      "-rewrite",
-      "-Wunused:imports"
+      "-rewrite"
+      // "-Wunused:imports"
     ),
     semanticdbEnabled := true,
     libraryDependencies ++= Seq(
@@ -31,6 +31,7 @@ lazy val root = (project in file("."))
       Deps.doobieMunit % Test,
       Deps.http4sBlazeServer,
       Deps.http4sDsl,
+      Deps.refined,
       Deps.logbackClassic,
       Deps.tapirHttp4sServer,
       Deps.tapirOpenapiDocs,

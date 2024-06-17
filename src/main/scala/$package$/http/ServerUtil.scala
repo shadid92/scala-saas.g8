@@ -28,7 +28,7 @@ object ServerUtil {
       pgPassword: String
   ) = for {
     ec <- ExecutionContexts.fixedThreadPool[F](10)
-    xa <- HikariTransactor.fromHikariConfig(
+    xa <- HikariTransactor.fromHikariConfigCustomEc[F](
       {
         val conf = com.zaxxer.hikari.HikariConfig()
         conf.setDriverClassName("org.postgresql.Driver")

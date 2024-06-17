@@ -28,8 +28,8 @@ object Config {
     }
 
   def loadJsonFile[F[_]: Async, C: Decoder](path: Path) = for {
-    text <- fs2.io.file
-      .Files[F]
+    text <- fs2.io.file.Files
+      .forAsync[F]
       .readAll(path)
       .through(fs2.text.utf8.decode)
       .compile

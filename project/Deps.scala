@@ -14,6 +14,7 @@ object Deps {
   lazy val doobieMunit = "org.tpolecat" %% "doobie-munit" % DoobieVersion
 
   lazy val munit = "org.scalameta" %% "munit" % "1.0.0-M11"
+  lazy val refined = "eu.timepit" %% "refined" % "0.9.28"
 
   lazy val http4sBlazeServer =
     "org.http4s" %% "http4s-blaze-server" % Http4sVersion

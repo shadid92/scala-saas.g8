@@ -2,10 +2,9 @@ package $package$.core.util
 
 import $package$.prelude.{*, given}
 
-trait TaggedUUID[T <: String](val uuid: UUID)(using T: ValueOf[T]) {
-
-  final override def toString = s"\${T.value}_\${uuid}"
-
+trait TaggedUUID[T <: String](using T: ValueOf[T]) {
+  val uuid: UUID
+  final override def toString = s"${T.value}_${uuid}"
 }
 
 trait TaggedUUIDCompanion[T <: String, TUUID <: TaggedUUID[T]](using
