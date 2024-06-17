@@ -5,20 +5,31 @@ import $package$.prelude.{*, given}
 
 class PhoneNumber private (val value: String) {
   override def toString = value
+  lazy val countryCode: Int = PhoneNumber.pnUtil
+    .parse(s"+\${value.filterNot(_ == '+')}", "")
+    .getCountryCode()
 }
 object PhoneNumber {
 
   private lazy val pnUtil = PhoneNumberUtil.getInstance()
 
-  def fromString(s: String): Option[PhoneNumber] =
+  def isValid(s: String): Option[PhoneNumber] = {
     try {
-      val pn = pnUtil.parse(s, "JO")
-      PhoneNumber(
-        pn.getCountryCode().toString + pn.getNationalNumber.toString
-      ).some
+      val pn = pnUtil.parse(s"+\$s", "")
+      val isValid = pnUtil.isValidNumber(pn) && s.length > 9
+      if isValid then
+        PhoneNumber(
+          pn.getCountryCode().toString + pn.getNationalNumber.toString
+        ).some
+      else None
     } catch {
       case _ => None
     }
+  }
+  def fromStringValidetionEither(s: String) =
+    Either.fromOption(isValid(s), Exception(parseErrorMsg(s)))
+
+  def fromString(s: String): Option[PhoneNumber] = isValid(s)
 
   def parseErrorMsg(phoneStr: String) = s"Invalid phone number: \$phoneStr"
 
