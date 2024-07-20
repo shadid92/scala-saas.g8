@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   pg:
-    image: postgres
+    image: postgres:15-bullseye
     command: sh -c "apt-get update && apt-get install -y postgresql-15-cron && docker-entrypoint.sh postgres -c 'max_connections=500' -c 'cron.database_name=$project_name_cabab_case$-dev' -c 'shared_preload_libraries=pg_cron'"
     ports:
       - 5432:5432
