@@ -13,18 +13,19 @@ object PhoneNumber {
 
   private lazy val pnUtil = PhoneNumberUtil.getInstance()
 
-  def isValid(s: String): Option[PhoneNumber] = {
-    try {
-      val pn = pnUtil.parse(s"+\$s", "")
-      val isValid = pnUtil.isValidNumber(pn) && s.length > 9
-      if isValid then
-        PhoneNumber(
-          pn.getCountryCode().toString + pn.getNationalNumber.toString
-        ).some
-      else None
-    } catch {
-      case _ => None
-    }
+  def isValid(number: String): Option[PhoneNumber] = number.toLongOption.map {
+    s =>
+      try {
+        val pn = pnUtil.parse(s"+\$s", "")
+        val isValid = pnUtil.isValidNumber(pn) && s.length > 9
+        if isValid then
+          PhoneNumber(
+            pn.getCountryCode().toString + pn.getNationalNumber.toString
+          ).some
+        else None
+      } catch {
+        case _ => None
+      }
   }
   def fromStringValidetionEither(s: String) =
     Either.fromOption(isValid(s), Exception(parseErrorMsg(s)))
